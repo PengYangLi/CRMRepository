@@ -7,10 +7,8 @@
     <properties resource="jdbc.properties"/>
 
     <typeAliases>
-
         <package name="com.py.crm.settings.domain"/>
-
-
+        <package name="com.py.crm.workbench.domain"/>
     </typeAliases>
 
 
@@ -39,8 +37,7 @@
 
 
     <mappers>
-
         <package name="com.py.crm.settings.dao"/>
-
+        <package name="com.py.crm.workbench.dao"/>
     </mappers>
 </configuration>
