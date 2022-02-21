@@ -19,16 +19,87 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <script type="text/javascript">
 
 	$(function(){
-		
+
 		$("#addBtn").click(function () {
+
+			$(".time").datetimepicker({
+				minView: "month",
+				language:  'zh-CN',
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayBtn: true,
+				pickerPosition: "bottom-left"
+			});
+
 
 			/*操作模态窗口：
 					传递参数“show”或者“hide”*/
-			$("#createActivityModal").modal("show");
+			//$("#createActivityModal").modal("show");
+
+			//在打开模态窗口前走后台获得用户信息
+			$.ajax({
+
+				url:"workbench/activity/getUserList.do",
+				type:"get",
+				dataType:"json",
+				success:function (data) {
+
+					//拼串
+					var html = "";
+
+					//遍历json数组
+					$.each(data,function (index,event) {
+						html += "<option value='"+event.id+"'>"+event.name+"</option>";
+					})
+
+					//赋值
+					$("#create-marketActivityOwner").html(html);
+
+					//设置默认选项
+					var id = "${user.id}";
+					$("#create-marketActivityOwner").val(id);
+
+					//展现模态窗口
+					$("#createActivityModal").modal("show");
+				}
+			})
+
+		})
+
+		//执行添加操作
+		$("#saveBtn").click(function () {
+			$.ajax({
+
+				url:"workbench/activity/save.do",
+				data:{
+					"owner": $.trim($("#create-marketActivityOwner").val()),
+					"name": $.trim($("#create-marketActivityName").val()),
+					"startDate": $.trim($("#create-startTime").val()),
+					"endDate": $.trim($("#create-endTime").val()),
+					"cost": $.trim($("#create-cost").val()),
+					"description": $.trim($("#create-describe").val())
+				},
+				type:"post",
+				dataType: "json",
+				success:function (data) {
+
+					if (data.success){
+						//添加成功
+						//刷新市场活动列表信息
+						//关闭添加操作的模态窗口
+						$("#createActivityModal").modal("hide");
+					}else {
+						//添加失败
+						alert("添加失败！");
+					}
+
+				}
+
+			})
+
 		})
 		
 	});
-	
 </script>
 </head>
 <body>
@@ -51,9 +122,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+
+
+
 								</select>
 							</div>
                             <label for="create-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -65,11 +136,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						<div class="form-group">
 							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-startTime">
+								<input type="text" class="form-control time" id="create-startTime">
 							</div>
 							<label for="create-endTime" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-endTime">
+								<input type="text" class="form-control time" id="create-endTime">
 							</div>
 						</div>
                         <div class="form-group">
@@ -91,7 +162,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+					<button type="button" class="btn btn-primary" id="saveBtn">保存</button>
 				</div>
 			</div>
 		</div>
@@ -115,9 +186,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="edit-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+
+
+
 								</select>
 							</div>
                             <label for="edit-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
