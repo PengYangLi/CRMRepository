@@ -86,6 +86,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					if (data.success){
 						//添加成功
 						//刷新市场活动列表信息
+
+						//清空数据
+						$("#activityAddFrom")[0].reset();
 						//关闭添加操作的模态窗口
 						$("#createActivityModal").modal("hide");
 					}else {
@@ -116,7 +119,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</div>
 				<div class="modal-body">
 				
-					<form class="form-horizontal" role="form">
+					<form class="form-horizontal" role="form" id="activityAddFrom">
 					
 						<div class="form-group">
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
