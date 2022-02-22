@@ -101,8 +101,64 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			})
 
 		})
-		
+
+		//页面加载完毕后调用方法
+		pageList(1,2);
+
+		//为查询按钮绑定单击事件
+		$("#searchBtn").click(function () {
+			pageList(1,2);
+		})
 	});
+
+	//分页方法
+	/*
+	* 	在什么情况下调用方法？
+	* 		1、点击左侧市场活动超链接
+	* 		2、添加、修改、保存之后
+	* 		3、点击查询按钮
+	*		4、点击分页组件
+	* */
+	function pageList(pageNo,pageSize) {
+		$.ajax({
+
+			url:"workbench/activity/pageList.do",
+			data: {
+				"pageNo":pageNo,
+				"pageSize":pageSize,
+				"name":$.trim($("#name").val()),
+				"owner":$.trim($("#owner").val()),
+				"startDate":$.trim($("#startDate").val()),
+				"endDate":$.trim($("#endDate").val())
+			},
+			type: "get",
+			dataType: "json",
+			success:function (data) {
+				/*
+				* 	data:
+				* 		我们需要的：市场活动信息
+				* 			[{市场活动1},{市场活动2},{市场活动3}]
+				*
+				*		分页插件需要的记录总条数：
+				* 			{"total":100}
+				*
+				* 		{"total":100,"dataList":[{市场活动1},{市场活动2},{市场活动3}]}
+				* */
+
+				var html = "";
+				$.each(data.dataList,function (index,element) {
+					html += '<tr class="active">';
+					html += '<td><input type="checkbox" value="'+element.id+'"/></td>';
+					html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\';">'+element.name+'</a></td>';
+					html += '<td>'+element.owner+'</td>';
+					html += '<td>'+element.startDate+'</td>';
+					html += '<td>'+element.endDate+'</td>';
+					html += '</tr>';
+				})
+				$("#dataList").html(html);
+			}
+		})
+	}
 </script>
 </head>
 <body>
@@ -254,7 +310,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				  
 				  <div class="form-group">
 				    <div class="input-group">
-				      <div class="input-group-addon">名称</div>
+				      <div class="input-group-addon" id="name">名称</div>
 				      <input class="form-control" type="text">
 				    </div>
 				  </div>
@@ -262,7 +318,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="owner">
 				    </div>
 				  </div>
 
@@ -280,7 +336,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    </div>
 				  </div>
 				  
-				  <button type="submit" class="btn btn-default">查询</button>
+				  <button type="button" class="btn btn-default" id="searchBtn">查询</button>
 				  
 				</form>
 			</div>
@@ -303,8 +359,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<td>结束日期</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
+					<tbody id="dataList">
+						<%--<tr class="active">
 							<td><input type="checkbox" /></td>
 							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
                             <td>zhangsan</td>
@@ -317,7 +373,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>
-                        </tr>
+                        </tr>--%>
 					</tbody>
 				</table>
 			</div>

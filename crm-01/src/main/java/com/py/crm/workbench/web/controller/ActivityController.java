@@ -3,10 +3,8 @@ package com.py.crm.workbench.web.controller;
 import com.py.crm.settings.domain.User;
 import com.py.crm.settings.service.UserService;
 import com.py.crm.settings.service.impl.UserServiceImpl;
-import com.py.crm.utils.DateTimeUtil;
-import com.py.crm.utils.PrintJson;
-import com.py.crm.utils.ServiceFactory;
-import com.py.crm.utils.UUIDUtil;
+import com.py.crm.utils.*;
+import com.py.crm.vo.PaginationVO;
 import com.py.crm.workbench.domain.Activity;
 import com.py.crm.workbench.service.ActivityService;
 import com.py.crm.workbench.service.impl.ActivityServiceImpl;
@@ -16,7 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ActivityController extends HttpServlet {
     @Override
@@ -32,8 +32,44 @@ public class ActivityController extends HttpServlet {
 
             save(req,resp);
 
+        }else if ("/workbench/activity/pageList.do".equals(path)){
+            pageList(req,resp);
         }
 
+    }
+
+    private void pageList(HttpServletRequest req, HttpServletResponse resp) {
+        //进入到市场活动列表的操作（结合条件查询和分页查询）
+        String name = req.getParameter("name");
+        String owner = req.getParameter("owner");
+        String startDate = req.getParameter("startDate");
+        String endDate = req.getParameter("endDate");
+        String pageNoStr = req.getParameter("pageNo");
+        int pageNo = Integer.parseInt(pageNoStr);
+        String pageSizeStr = req.getParameter("pageSize");
+        int pageSize = Integer.parseInt(pageSizeStr);
+        int skipCount = (pageNo-1)*pageSize;
+
+        //封装数据
+        Map<String, Object> map = new HashMap<>();
+        map.put("name",name);
+        map.put("owner",owner);
+        map.put("startDate",startDate);
+        map.put("endDate",endDate);
+        map.put("skipCount",skipCount);
+        map.put("pageSize",pageSize);
+
+        //创建代理类
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        /*
+        *   前端要数据总条数和市场活动信息列表，业务层拿到后用VO类来做封装
+        *
+        *   PaginationVO<T>
+        * */
+        //调用pageList方法
+        PaginationVO<Activity> vo = as.pageList(map);
+        PrintJson.printJsonObj(resp,vo);
     }
 
     private void save(HttpServletRequest req, HttpServletResponse resp) {
