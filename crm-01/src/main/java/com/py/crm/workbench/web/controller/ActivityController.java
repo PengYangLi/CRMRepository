@@ -6,6 +6,7 @@ import com.py.crm.settings.service.impl.UserServiceImpl;
 import com.py.crm.utils.*;
 import com.py.crm.vo.PaginationVO;
 import com.py.crm.workbench.domain.Activity;
+import com.py.crm.workbench.domain.ActivityRemark;
 import com.py.crm.workbench.service.ActivityService;
 import com.py.crm.workbench.service.impl.ActivityServiceImpl;
 
@@ -34,8 +35,105 @@ public class ActivityController extends HttpServlet {
 
         }else if ("/workbench/activity/pageList.do".equals(path)){
             pageList(req,resp);
+        }else if ("/workbench/activity/delete.do".equals(path)){
+            delete(req,resp);
+        }else if ("/workbench/activity/getUserListActivity.do".equals(path)){
+            getUserListActivity(req,resp);
+        }else if ("/workbench/activity/update.do".equals(path)){
+            update(req,resp);
+        }else if ("/workbench/activity/detail.do".equals(path)){
+            detail(req,resp);
+        }else if ("/workbench/activity/getRemarkListByAid.do".equals(path)){
+            getRemarkListByAid(req,resp);
         }
 
+    }
+
+    private void getRemarkListByAid(HttpServletRequest req, HttpServletResponse resp) {
+
+        //进入到查询备注信息操作
+
+        String activityId = req.getParameter("activityId");
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        List<ActivityRemark> activityRemarks = as.getRemarkListByAid(activityId);
+
+        PrintJson.printJsonObj(resp,activityRemarks);
+    }
+
+    private void detail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        //进入到跳转详细页面的操作
+        String id = req.getParameter("id");
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        Activity activity = as.detail(id);
+
+        req.setAttribute("activity",activity);
+
+        req.getRequestDispatcher("/workbench/activity/detail.jsp").forward(req,resp);
+    }
+
+    private void update(HttpServletRequest req, HttpServletResponse resp) {
+
+        //执行市场活动修改操作
+        String id = req.getParameter("id");
+        String owner = req.getParameter("owner");
+        String name = req.getParameter("name");
+        String startDate = req.getParameter("startDate");
+        String endDate = req.getParameter("endDate");
+        String cost = req.getParameter("cost");
+        String description = req.getParameter("description");
+        //获取当前系统时间
+        String editTime = DateTimeUtil.getSysTime();
+        //获取创建人
+        User user = (User) req.getSession().getAttribute("user");
+        String editBy = user.getName();
+
+        //创建对象封装数据
+        Activity activity = new Activity();
+        activity.setId(id);
+        activity.setOwner(owner);
+        activity.setName(name);
+        activity.setStartDate(startDate);
+        activity.setEndDate(endDate);
+        activity.setCost(cost);
+        activity.setDescription(description);
+        activity.setEditTime(editTime);
+        activity.setEditBy(editBy);
+
+        //创建代理类
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = as.update(activity);
+
+        PrintJson.printJsonFlag(resp,flag);
+
+    }
+
+    private void getUserListActivity(HttpServletRequest req, HttpServletResponse resp) {
+
+        //进入到查询用户信息列表，根据市场活动id查询单条
+        String id = req.getParameter("id");
+
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        Map<String,Object> map = activityService.getUserListActivity(id);
+
+        PrintJson.printJsonObj(resp,map);
+    }
+
+    private void delete(HttpServletRequest req, HttpServletResponse resp) {
+
+        //进入到删除市场活动控制器
+        String[] ids = req.getParameterValues("id");
+
+        //创建代理类
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        //通过代理类调用delete方法
+        boolean flag = as.delete(ids);
+        PrintJson.printJsonFlag(resp,flag);
     }
 
     private void pageList(HttpServletRequest req, HttpServletResponse resp) {
